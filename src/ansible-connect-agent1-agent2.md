@@ -26,9 +26,11 @@ visudo -f /etc/sudoers.d/devops
 #输入以下配置,用于devops提权时,免密码,不然ansible会失败.
 devops ALL=(ALL) NOPASSWD: ALL
 
-# 验证:
-su - devops
-sudo whoami
+
+## 防k3s目录找不到
+sudo visudo -f /etc/sudoers.d/secure-path
+Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 ```
 
 #### 2). Run In Mac os:
