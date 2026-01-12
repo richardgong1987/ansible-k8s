@@ -1,44 +1,6 @@
 - hosts: k3s_server
   become: true
   tasks:
-    - name: Make SELinux permissive on all nodes (lab)
-      hosts: all
-      become: true
-      tasks:
-        - name: Check SELinux status
-          ansible.builtin.command: getenforce
-          register: se_status
-          changed_when: false
-
-        - name: Set SELinux to permissive (runtime)
-          ansible.builtin.command: setenforce 0
-          when: se_status.stdout == "Enforcing"
-
-        - name: Persist SELinux permissive in config
-          ansible.builtin.replace:
-            path: /etc/selinux/config
-            regexp: '^SELINUX=.*$'
-            replace: 'SELINUX=permissive'
-            backup: true
-
-    - name: Restart k3s services
-      hosts: k3s_server
-      become: true
-      tasks:
-        - name: Restart k3s server
-          ansible.builtin.service:
-            name: k3s
-            state: restarted
-
-    - name: Restart k3s-agent services
-      hosts: k3s_agents
-      become: true
-      tasks:
-        - name: Restart k3s agent
-          ansible.builtin.service:
-            name: k3s-agent
-            state: restarted
-
     - name: Wait for nodes to be Ready
       ansible.builtin.command: kubectl get nodes
       register: nodes_out
