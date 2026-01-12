@@ -83,7 +83,7 @@ kubectl version --client
 
 ## 4). 让你从 Mac 直接 kubectl 管理（不需要每次进 VM）
 ```yaml
-cat /etc/rancher/k3s/k3s.yaml
+cat /etc/rancher/k3s/k3s.yml
 ```
 把里面的：
 •	server: https://127.0.0.1:6443

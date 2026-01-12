@@ -37,3 +37,10 @@ ssh-copy-id root@192.168.2.147
 
 ```
 
+# 二. Run ansible, install k3s in agent-1,agent-2
+```shell
+cd ansible
+
+ansible-playbook playbooks/site.yml
+
+```

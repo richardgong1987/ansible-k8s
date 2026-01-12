@@ -1,0 +1,47 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Install base packages
+      ansible.builtin.dnf:
+        name:
+          - python3
+          - sudo
+          - curl
+        state: present
+
+    - name: Disable swap (k8s requirement)
+      ansible.builtin.shell: |
+        swapoff -a
+        sed -i.bak '/\bswap\b/d' /etc/fstab
+      args:
+        warn: false
+
+- hosts: k3s_server
+  become: true
+  tasks:
+    - name: Install k3s server
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | sh -
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Read node token
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token
+
+    - name: Set token fact
+      ansible.builtin.set_fact:
+        k3s_token: "{{ node_token.content | b64decode | trim }}"
+
+- hosts: k3s_agents
+  become: true
+  vars:
+    k3s_url: "https://{{ hostvars[groups['k3s_server'][0]].ansible_host }}:6443"
+    k3s_token: "{{ hostvars[groups['k3s_server'][0]].k3s_token }}"
+  tasks:
+    - name: Install k3s agent and join
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | K3S_URL={{ k3s_url }} K3S_TOKEN={{ k3s_token }} sh -
+      args:
+        creates: /usr/local/bin/k3s-agent
