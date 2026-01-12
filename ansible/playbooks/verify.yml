@@ -26,3 +26,14 @@
         msg:
           - "{{ nodes_wide.stdout }}"
           - "{{ pods_wide.stdout }}"
+
+    - name: Get kube-system pods
+      ansible.builtin.command: kubectl get pods -n kube-system --no-headers
+      register: ks_pods
+      changed_when: false
+
+    - name: Fail if kube-system has unhealthy pods
+      ansible.builtin.assert:
+        that:
+          - ks_pods.stdout_lines | select('search', 'CrashLoopBackOff|CreateContainerError|ImagePullBackOff|Error') | list | length == 0
+        fail_msg: "kube-system has unhealthy pods. Run: kubectl get pods -n kube-system -o wide"
