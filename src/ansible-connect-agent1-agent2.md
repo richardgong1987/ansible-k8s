@@ -9,6 +9,8 @@ systemctl enable --now sshd
 useradd -m -s /bin/bash devops
 usermod -aG wheel devops
 
+
+
 mkdir -p /home/devops/.ssh
 chmod 700 /home/devops/.ssh
 
@@ -19,6 +21,14 @@ chown devops:devops /home/devops/.ssh/authorized_keys
 ## 把mac public key放进来. 请用id_ed25519.pub的.这个比较好.为了免登陆
 chmod 600 /home/devops/.ssh/authorized_keys
 
+#用于devops提权时,免密码
+visudo -f /etc/sudoers.d/devops
+#输入以下配置,用于devops提权时,免密码,不然ansible会失败.
+devops ALL=(ALL) NOPASSWD: ALL
+
+# 验证:
+su - devops
+sudo whoami
 ```
 
 #### 2). Run In Mac os:
